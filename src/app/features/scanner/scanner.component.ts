@@ -148,18 +148,57 @@ import { Html5Qrcode } from 'html5-qrcode';
     .animate-scan {
       animation: scan 2s ease-in-out infinite;
     }
-    #qr-reader {
+    /* Hide all default html5-qrcode UI elements */
+    :host ::ng-deep #qr-reader {
       border: none !important;
+      background: transparent !important;
     }
-    #qr-reader video {
+    :host ::ng-deep #qr-reader video {
       width: 100% !important;
       height: 100% !important;
       object-fit: cover !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
     }
-    #qr-reader__scan_region {
+    :host ::ng-deep #qr-reader__scan_region {
       display: none !important;
     }
-    #qr-reader__dashboard {
+    :host ::ng-deep #qr-reader__dashboard {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader__dashboard_section {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader__dashboard_section_csr {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader__dashboard_section_swaplink {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader__status_span {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader__camera_selection {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader__filescan_input {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader > div:not(:first-child) {
+      display: none !important;
+    }
+    /* Hide the shaded region / scanning box from the library */
+    :host ::ng-deep #qr-shaded-region {
+      display: none !important;
+    }
+    :host ::ng-deep [id^="qr-shaded"] {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader canvas {
+      display: none !important;
+    }
+    :host ::ng-deep #qr-reader img {
       display: none !important;
     }
   `]
@@ -192,8 +231,9 @@ export class ScannerComponent implements AfterViewInit, OnDestroy {
       
       const config = {
         fps: 10,
-        qrbox: { width: 250, height: 250 },
+        qrbox: undefined, // Disable default scanning box
         aspectRatio: 1.0,
+        disableFlip: false,
       };
 
       await this.html5QrCode.start(
