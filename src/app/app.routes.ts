@@ -29,17 +29,17 @@ export const routes: Routes = [
   },
   {
     path: 'guests',
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    loadComponent: () => import('./features/guest/guest').then(m => m.Guest),
     canActivate: [authGuard]
   },
   {
     path: 'search',
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    loadComponent: () => import('./features/search/search').then(m => m.SearchComponent),
     canActivate: [authGuard]
   },
   {
     path: 'settings',
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    loadComponent: () => import('./features/settings/settings').then(m => m.SettingsComponent),
     canActivate: [authGuard]
   },
   {
@@ -47,3 +47,4 @@ export const routes: Routes = [
     redirectTo: 'login'
   }
 ];
+

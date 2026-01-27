@@ -1,179 +1,131 @@
 import { Component, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { HeaderComponent, BottomNavComponent, PhaseTabsComponent } from '../../shared';
+import { RouterLink } from '@angular/router';
+import { BottomNavComponent } from '../../shared';
 import { EventService, AuthService } from '../../core';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [HeaderComponent, BottomNavComponent, PhaseTabsComponent, DatePipe],
+  imports: [BottomNavComponent, RouterLink],
   template: `
-    <div class="min-h-screen bg-gray-50 pb-24">
-      <!-- Header -->
-      <header class="bg-primary text-white">
-        <div class="flex items-center justify-between px-4 py-3">
-          <button class="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-            </svg>
-          </button>
-          <span class="font-semibold">WePlanner Protocol</span>
-          @if (authService.user()?.photo; as photo) {
-            <img [src]="photo" alt="User" class="w-9 h-9 rounded-full border-2 border-white/30 object-cover"/>
-          } @else {
-            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-sm font-medium">
-              {{ authService.userInitials() }}
-            </div>
-          }
+    <div class="min-h-screen bg-slate-50 pb-24 font-sans text-slate-900">
+      
+      <!-- User Header -->
+      <header class="bg-white sticky top-0 z-30 safe-top border-b border-slate-100 shadow-sm">
+        <div class="px-5 py-4 flex items-center justify-between">
+           <div>
+             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Bonjour,</p>
+             <h1 class="text-xl font-bold text-slate-900">{{ (authService.user()?.name || '').split(' ')[0] }}</h1>
+           </div>
+           
+           @if (authService.user()?.photo; as photo) {
+            <img [src]="photo" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm hover:scale-105 transition-transform cursor-pointer" routerLink="/settings"/>
+           } @else {
+             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shadow-sm cursor-pointer hover:bg-indigo-200 transition-colors" routerLink="/settings">
+               {{ authService.userInitials() }}
+             </div>
+           }
         </div>
       </header>
-      
-      <!-- Event Banner -->
-      <div class="bg-primary text-white px-4 pb-4">
-        <div class="flex justify-center mb-3">
-          <span class="px-4 py-1.5 bg-white/15 backdrop-blur rounded-full text-xs font-semibold tracking-wide">
-            ÉVÉNEMENT EN COURS
-          </span>
-        </div>
-        <h2 class="text-2xl font-bold text-center">{{ event()?.name }}</h2>
-        <p class="text-white/70 text-sm text-center mt-2 flex items-center justify-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
-          </svg>
-          24 Juin 2024
-        </p>
-      </div>
-      
-      <!-- Phase Tabs -->
-      <div class="bg-primary">
-        <app-phase-tabs 
-          [phases]="event()?.phases ?? []"
-          [activePhase]="eventService.activePhase()"
-          (phaseChange)="eventService.setActivePhase($event)"
-        />
-      </div>
 
-      <!-- Stats Card -->
-      <div class="px-4 -mt-3 relative z-10">
-        <div class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-6">
-          <!-- Real-time indicator -->
-          <div class="flex items-center justify-center gap-2 mb-4">
-            <span class="relative flex h-2.5 w-2.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+      <main class="max-w-md mx-auto p-5 space-y-6">
+
+        <!-- Identity Section (Concept: Access Pass) -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start justify-between">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-green-50 text-green-700 text-[10px] font-bold tracking-wide uppercase border border-green-100 mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+              En Direct
             </span>
-            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Temps Réel</span>
+            <h2 class="text-lg font-bold text-slate-900 leading-tight">{{ event()?.name }}</h2>
+            <p class="text-slate-500 text-sm mt-1">{{ formatDate(event()?.date) }}</p>
           </div>
-          
-          <p class="text-xs text-gray-400 text-center uppercase tracking-widest font-medium">Invités Scannés</p>
-          <p class="text-7xl font-bold text-center text-gray-900 my-3 tabular-nums">{{ stats()?.scannedCount }}</p>
-          
-          <!-- Progress Bar -->
-          <div class="mt-4">
-            <div class="flex items-center justify-between text-sm mb-2">
-              <span class="text-gray-500 font-medium">Progression</span>
-              <span class="font-bold text-primary">{{ stats()?.progressPercent }}%</span>
-            </div>
-            <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-              <div 
-                class="h-full bg-gradient-to-r from-primary to-primary-light rounded-full transition-all duration-700 ease-out"
-                [style.width.%]="stats()?.progressPercent"
-              ></div>
-            </div>
-            <p class="text-center text-sm text-gray-400 mt-3">
-              sur <span class="font-bold text-gray-600">{{ stats()?.totalExpected }}</span> attendus
-            </p>
+          <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
           </div>
+        </div>
 
-          <!-- Mini Stats Grid -->
-          <div class="grid grid-cols-2 gap-3 mt-6">
-            <div class="bg-green-50 rounded-xl p-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                  </svg>
-                </div>
+        <!-- Monitoring Section -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Statistiques</h3>
+          <div class="grid grid-cols-2 gap-3">
+            
+            <!-- Main Gauge Card -->
+            <div class="col-span-1 bg-indigo-600 rounded-2xl p-4 text-white shadow-lg shadow-indigo-200 flex flex-col justify-between relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl pointer-events-none"></div>
+              
+              <p class="text-indigo-200 text-xs font-medium uppercase relative z-10">Présents</p>
+              <div class="relative z-10 my-2">
+                <span class="text-4xl font-bold tracking-tight">{{ stats()?.scannedCount }}</span>
+                <span class="text-sm text-indigo-300 font-medium ml-1">/ {{ stats()?.totalExpected }}</span>
+              </div>
+              
+              <div class="w-full bg-black/20 h-1.5 rounded-full overflow-hidden relative z-10">
+                <div class="h-full bg-green-400 rounded-full transition-all duration-500" [style.width.%]="stats()?.progressPercent"></div>
+              </div>
+            </div>
+
+            <!-- Detail Stack -->
+            <div class="col-span-1 flex flex-col gap-3">
+              <div class="flex-1 bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex items-center justify-between">
                 <div>
-                  <p class="text-2xl font-bold text-gray-900">{{ stats()?.validatedCount }}</p>
-                  <p class="text-xs text-gray-500 font-medium">Validés</p>
+                  <p class="text-[10px] text-slate-400 font-bold uppercase">Attendu</p>
+                  <p class="text-xl font-bold text-slate-900">{{ (stats()?.totalExpected || 0) - (stats()?.scannedCount || 0) }}</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
               </div>
-            </div>
-            <div class="bg-red-50 rounded-xl p-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
-                  </svg>
-                </div>
+
+              <div class="flex-1 bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex items-center justify-between">
                 <div>
-                  <p class="text-2xl font-bold text-gray-900">{{ stats()?.refusedCount }}</p>
-                  <p class="text-xs text-gray-500 font-medium">Refusés</p>
+                  <p class="text-[10px] text-red-400 font-bold uppercase">Refusés</p>
+                  <p class="text-xl font-bold text-red-600">{{ stats()?.refusedCount }}</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
 
-        <!-- Activity Section -->
-        <div class="mt-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-gray-900">Activité Récente</h3>
-            <button class="text-primary text-sm font-semibold hover:text-primary-dark transition-colors">Voir tout</button>
-          </div>
-          
-          <div class="space-y-3">
-            @for (log of eventService.activityLogs().slice(0, 4); track log.id) {
-              <div class="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
-                <div [class]="getStatusIconClass(log.status)">
-                  @if (log.status === 'validated') {
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                    </svg>
-                  } @else {
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                  }
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-gray-900 truncate">{{ log.guestName }}</p>
-                  <p class="text-xs text-gray-400">{{ log.table ? log.table + ' • ' : '' }}{{ log.category }}</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                  <p class="text-sm text-gray-500 font-medium">{{ formatTime(log.time) }}</p>
-                  <p [class]="getStatusTextClass(log.status)">
-                    {{ log.status === 'validated' ? 'VALIDÉ' : 'ERREUR' }}
-                  </p>
-                </div>
-              </div>
-            }
+        <!-- Quick Actions Grid -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Actions</h3>
+          <div class="grid grid-cols-4 gap-3">
+            
+            <a routerLink="/scanner" class="col-span-2 bg-slate-900 text-white p-4 rounded-2xl shadow-lg shadow-slate-200 flex flex-col items-center justify-center gap-2 text-center active:scale-95 transition-transform relative overflow-hidden group">
+               <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+               <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 14.625v6m3-3h-6"/></svg>
+               <span class="font-bold text-sm">Scanner</span>
+            </a>
+
+            <a routerLink="/guests" class="col-span-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-1 text-center active:scale-95 transition-transform hover:bg-slate-50 aspect-square">
+               <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+               <span class="font-medium text-[10px] text-slate-600">Liste</span>
+            </a>
+
+            <a routerLink="/search" class="col-span-1 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center gap-1 text-center active:scale-95 transition-transform hover:bg-slate-50 aspect-square">
+               <svg class="w-6 h-6 text-slate-400 hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+               <span class="font-medium text-[10px] text-slate-600">Recherche</span>
+            </a>
+
           </div>
         </div>
 
-        <!-- Quick Access Card -->
-        <div class="mt-6 mb-4">
-          <button class="w-full bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
-              </svg>
-            </div>
-            <div class="flex-1 text-left">
-              <p class="font-semibold text-gray-900">Liste des invités</p>
-              <p class="text-sm text-gray-400">Recherche manuelle</p>
-            </div>
-            <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+      </main>
 
       <app-bottom-nav />
     </div>
-  `
+  `,
+
+  styles: [`
+    .safe-top {
+      padding-top: env(safe-area-inset-top);
+    }
+  `]
 })
 export class DashboardComponent {
   readonly eventService = inject(EventService);
@@ -182,17 +134,8 @@ export class DashboardComponent {
   readonly event = this.eventService.currentEvent;
   readonly stats = this.eventService.stats;
 
-  getStatusIconClass(status: string): string {
-    const base = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0';
-    return status === 'validated' ? `${base} bg-green-500` : `${base} bg-red-500`;
-  }
-
-  getStatusTextClass(status: string): string {
-    const base = 'text-xs font-bold';
-    return status === 'validated' ? `${base} text-green-500` : `${base} text-red-500`;
-  }
-
-  formatTime(date: Date): string {
-    return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  formatDate(date: Date | undefined): string {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   }
 }

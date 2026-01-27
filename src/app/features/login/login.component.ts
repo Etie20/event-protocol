@@ -8,100 +8,94 @@ import { AuthService } from '../../core';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="min-h-screen flex flex-col">
-      <!-- Purple Header -->
-      <div class="bg-primary text-white text-center py-12 px-6 rounded-b-[2rem]">
-        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-        <h1 class="text-2xl font-bold">WePlanner Protocol</h1>
-        <p class="text-white/70 text-sm mt-1">SÉCURITÉ & LOGISTIQUE</p>
-      </div>
+    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50 relative overflow-hidden font-sans">
+      
+      <!-- Subtle Background Accents -->
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-100/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
 
-      <!-- Login Card -->
-      <div class="flex-1 px-6 -mt-6">
-        <div class="card p-6">
-          <h2 class="text-2xl font-bold text-center text-gray-900 mb-2">Connexion</h2>
-          <p class="text-gray-500 text-center text-sm mb-6">
-            Veuillez vous identifier pour accéder au protocole.
-          </p>
-
-          <!-- QR Scanner Button -->
-          <button 
-            (click)="scanQR()"
-            class="btn btn-secondary w-full mb-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-            </svg>
-            SCANNER LE QR CODE
-          </button>
-          <p class="text-xs text-gray-400 text-center mb-6">Recommandé pour le personnel sur site</p>
-
-          <!-- Divider -->
-          <div class="flex items-center gap-4 my-6">
-            <div class="flex-1 h-px bg-gray-200"></div>
-            <span class="text-gray-400 text-sm">OU</span>
-            <div class="flex-1 h-px bg-gray-200"></div>
+      <!-- Main Container -->
+      <div class="w-full max-w-sm relative z-10">
+        
+        <!-- Header / Logo -->
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-md mb-4 text-indigo-600">
+             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+             </svg>
           </div>
+          <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">WePlanner Protocol</h1>
+          <p class="text-slate-500 mt-2 text-sm font-medium">Connectez-vous pour accéder à l'événement</p>
+        </div>
 
-          <!-- Manual Code Entry -->
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Code d'accès Événement</label>
+        <!-- Login Form Card -->
+        <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/60 border border-white">
+          
+          <div class="space-y-6">
+            
+            <!-- QR Action -->
+             <button 
+              (click)="scanQR()"
+              class="w-full py-4 px-4 bg-indigo-50 text-indigo-700 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-indigo-100 active:scale-[0.98] transition-all border border-indigo-100"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 15h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008zm-2.25 0h.008v.008h-.008v-.008zm2.25 2.25h.008v.008h-.008v-.008zm-2.25 0h.008v.008h-.008v-.008zm2.25-4.5h.008v.008h-.008v-.008zm-2.25 0h.008v.008h-.008v-.008z"/>
+              </svg>
+              Scanner mon badge
+            </button>
+
+            <!-- Divider -->
+            <div class="relative flex items-center py-2">
+              <div class="flex-grow border-t border-slate-200"></div>
+              <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold uppercase tracking-widest">Ou par code</span>
+              <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <!-- Manual Entry -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700 ml-1">Code d'accès</label>
               <div class="relative">
-                <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                </svg>
                 <input 
                   type="text" 
                   [(ngModel)]="accessCode"
-                  placeholder="Ex: 123456"
+                  placeholder="------"
                   maxlength="6"
-                  class="input pl-12"
+                  class="w-full pl-4 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-center tracking-[0.5em] font-mono text-xl font-bold shadow-inner"
                 />
               </div>
             </div>
 
+            <!-- Submit -->
             <button 
               (click)="loginWithCode()"
               [disabled]="accessCode().length !== 6 || isLoading()"
-              class="btn btn-primary w-full"
+              class="w-full py-4 px-6 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-slate-900/20 flex items-center justify-center gap-2"
             >
               @if (isLoading()) {
-                <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                <svg class="animate-spin w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               } @else {
-                Accéder à l'événement
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                </svg>
+                Accéder maintenant
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               }
             </button>
+
           </div>
         </div>
 
-        <!-- Help Link -->
-        <div class="text-center mt-6">
-          <button class="text-gray-400 text-sm inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Problème de connexion ?
-          </button>
+        <div class="mt-8 text-center text-xs text-slate-400 font-medium">
+          <p>Besoin d'aide ? <a href="#" class="text-indigo-600 hover:underline">Contacter le support</a></p>
         </div>
 
-        <!-- Version -->
-        <p class="text-center text-gray-300 text-xs mt-4">WePlanner App v2.4.0</p>
       </div>
     </div>
   `
 })
 export class LoginComponent {
+
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -110,20 +104,24 @@ export class LoginComponent {
 
   async loginWithCode(): Promise<void> {
     this.isLoading.set(true);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     const success = await this.authService.loginWithCode(this.accessCode());
     this.isLoading.set(false);
-    
+
     if (success) {
       this.router.navigate(['/dashboard']);
     }
   }
 
   async scanQR(): Promise<void> {
-    // In a real app, this would open the camera
     this.isLoading.set(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     const success = await this.authService.loginWithQR('mock-qr-data');
     this.isLoading.set(false);
-    
+
     if (success) {
       this.router.navigate(['/dashboard']);
     }
