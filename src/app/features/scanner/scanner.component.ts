@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnDestroy, AfterViewInit, ElementRef, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ScannerService } from '../../core';
+import { ScannerService, EventService } from '../../core';
 import { Html5Qrcode } from 'html5-qrcode';
 
 @Component({
@@ -12,7 +12,7 @@ import { Html5Qrcode } from 'html5-qrcode';
     <div class="min-h-screen bg-black relative overflow-hidden">
       <!-- Camera View -->
       <div id="qr-reader" #qrReader class="absolute inset-0 w-full h-full"></div>
-      
+
       <!-- Overlay -->
       <div class="absolute inset-0 pointer-events-none">
         <!-- Top gradient -->
@@ -42,7 +42,7 @@ import { Html5Qrcode } from 'html5-qrcode';
       <!-- Scanner Frame & Instructions -->
       <div class="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
         <p class="text-white text-lg font-medium mb-6 drop-shadow-lg">Visez le QR code du billet</p>
-        
+
         <!-- Scanner Frame -->
         <div class="relative w-64 h-64">
           <!-- Animated corners -->
@@ -50,7 +50,7 @@ import { Html5Qrcode } from 'html5-qrcode';
           <div class="absolute top-0 right-0 w-16 h-16 border-r-4 border-t-4 border-secondary rounded-tr-2xl"></div>
           <div class="absolute bottom-0 left-0 w-16 h-16 border-l-4 border-b-4 border-secondary rounded-bl-2xl"></div>
           <div class="absolute bottom-0 right-0 w-16 h-16 border-r-4 border-b-4 border-secondary rounded-br-2xl"></div>
-          
+
           <!-- Scanning line -->
           <div class="absolute inset-x-4 top-4 bottom-4 overflow-hidden">
             <div class="w-full h-0.5 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-scan"></div>
@@ -58,7 +58,7 @@ import { Html5Qrcode } from 'html5-qrcode';
         </div>
 
         <p class="text-white/60 text-sm mt-6">Le scan se lancera automatiquement</p>
-        
+
         @if (cameraError()) {
           <div class="mt-4 px-4 py-2 bg-red-500/80 backdrop-blur rounded-lg">
             <p class="text-white text-sm">{{ cameraError() }}</p>
@@ -69,7 +69,7 @@ import { Html5Qrcode } from 'html5-qrcode';
       <!-- Bottom Actions -->
       <div class="absolute bottom-0 left-0 right-0 z-20 p-6 pb-10">
         <!-- Manual Entry Button -->
-        <button 
+        <button
           (click)="showManualEntry.set(true)"
           class="w-full bg-gray-800/80 backdrop-blur-md text-white py-4 px-6 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-700/80 transition-all pointer-events-auto"
         >
@@ -97,23 +97,23 @@ import { Html5Qrcode } from 'html5-qrcode';
             <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">Saisie manuelle</h3>
             <p class="text-gray-500 text-sm mb-6">Entrez le code du billet</p>
-            
-            <input 
-              type="text" 
+
+            <input
+              type="text"
               [(ngModel)]="manualCode"
               placeholder="Ex: TICKET-001"
               class="w-full px-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-lg"
               autofocus
             />
-            
+
             <div class="flex gap-3 mt-6">
-              <button 
+              <button
                 (click)="showManualEntry.set(false)"
                 class="flex-1 px-6 py-4 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
               >
                 Annuler
               </button>
-              <button 
+              <button
                 (click)="submitManualCode()"
                 [disabled]="!manualCode() || isProcessing()"
                 class="flex-1 px-6 py-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -206,12 +206,13 @@ import { Html5Qrcode } from 'html5-qrcode';
 export class ScannerComponent implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly scannerService = inject(ScannerService);
-  
+  private readonly eventService = inject(EventService);
+
   private html5QrCode: Html5Qrcode | null = null;
   private isScanning = false;
 
   qrReader = viewChild<ElementRef>('qrReader');
-  
+
   showManualEntry = signal(false);
   manualCode = signal('');
   isProcessing = signal(false);
@@ -228,7 +229,7 @@ export class ScannerComponent implements AfterViewInit, OnDestroy {
   private async startCamera(): Promise<void> {
     try {
       this.html5QrCode = new Html5Qrcode('qr-reader');
-      
+
       const config = {
         fps: 10,
         qrbox: undefined, // Disable default scanning box
@@ -245,7 +246,7 @@ export class ScannerComponent implements AfterViewInit, OnDestroy {
             await this.handleScan(decodedText);
           }
         },
-        () => {} // Ignore errors during scanning
+        () => { } // Ignore errors during scanning
       );
     } catch (err) {
       console.error('Camera error:', err);
@@ -267,15 +268,18 @@ export class ScannerComponent implements AfterViewInit, OnDestroy {
 
   private async handleScan(code: string): Promise<void> {
     this.isProcessing.set(true);
-    
+
     // Vibration feedback if available
     if (navigator.vibrate) {
       navigator.vibrate(100);
     }
 
-    await this.scannerService.scanTicket(code);
+    const eventId = this.eventService.currentEvent()?.id || '';
+    const gateId = ''; // TODO: à configurer dans les settings ou via l'API
+
+    await this.scannerService.scanTicket(code, eventId, gateId);
     await this.stopCamera();
-    this.router.navigate(['/result']);
+    await this.router.navigate(['/result']);
   }
 
   goBack(): void {
@@ -285,9 +289,13 @@ export class ScannerComponent implements AfterViewInit, OnDestroy {
 
   async submitManualCode(): Promise<void> {
     if (!this.manualCode() || this.isProcessing()) return;
-    
+
     this.isProcessing.set(true);
-    await this.scannerService.scanTicket(this.manualCode());
+
+    const eventId = this.eventService.currentEvent()?.id || '';
+    const gateId = ''; // TODO: à configurer dans les settings ou via l'API
+
+    await this.scannerService.scanTicket(this.manualCode(), eventId, gateId);
     await this.stopCamera();
     this.showManualEntry.set(false);
     this.router.navigate(['/result']);

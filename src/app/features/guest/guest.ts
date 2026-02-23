@@ -14,7 +14,7 @@ export class Guest {
   readonly eventService = inject(EventService);
   readonly stats = this.eventService.stats;
   readonly currentEvent = this.eventService.currentEvent;
-  readonly activePhase = this.eventService.activePhase;
+  // readonly activePhase = this.eventService.activePhase; // Removed in new model
 
   getStatusIconClass(status: string): string {
     const base = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0';
@@ -30,7 +30,7 @@ export class Guest {
     return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  formatDate(date: Date | undefined): string {
+  formatDate(date: Date | string | undefined): string {
     if (!date) return '';
     return new Date(date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   }
@@ -60,8 +60,9 @@ export class Guest {
 
   getPhaseLabel(phaseId: string | null): string {
     if (!phaseId) return '';
-    const phase = this.currentEvent()?.phases.find(p => p.id === phaseId);
-    return phase ? phase.name : phaseId;
+    // const phase = this.currentEvent()?.phases?.find(p => p.id === phaseId);
+    // return phase ? phase.name : phaseId;
+    return 'Phase'; // Placeholder until phases are back
   }
 
   getProgressBackground(): string {
