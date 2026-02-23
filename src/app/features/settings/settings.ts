@@ -4,10 +4,10 @@ import { Router } from '@angular/router';
 import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-nav.component';
 
 @Component({
-    selector: 'app-settings',
-    standalone: true,
-    imports: [BottomNavComponent],
-    template: `
+  selector: 'app-settings',
+  standalone: true,
+  imports: [BottomNavComponent],
+  template: `
     <div class="min-h-screen bg-gray-50 pb-24 font-sans text-gray-900">
       <!-- Header -->
       <header class="bg-white border-b border-gray-200 sticky top-0 z-30 safe-top">
@@ -100,21 +100,21 @@ import { BottomNavComponent } from '../../shared/components/bottom-nav/bottom-na
       <app-bottom-nav />
     </div>
   `,
-    styles: [`
+  styles: [`
     .safe-top {
       padding-top: env(safe-area-inset-top);
     }
   `]
 })
 export class SettingsComponent {
-    readonly authService = inject(AuthService);
-    private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-    soundEnabled = signal(true);
-    vibrateEnabled = signal(true);
+  soundEnabled = signal(true);
+  vibrateEnabled = signal(true);
 
-    logout(): void {
-        // In real app, call authService.logout()
-        this.router.navigate(['/login']);
-    }
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }
