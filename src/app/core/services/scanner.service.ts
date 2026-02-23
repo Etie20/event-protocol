@@ -1,25 +1,27 @@
-import { Injectable, signal } from '@angular/core';
-import { ScanResult, Guest } from '../../models';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { ScanResult } from '../../models';
+
+// Interface pour le body de la requête POST /api/scans
+export interface ScanRequest {
+  ticketId: string;
+  eventId: string;
+  gateId: string;
+  isSuccessful: boolean;
+  failureReason: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ScannerService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = 'https://weplannerapi.enlighteninnovation.com/api/scans';
+
   private readonly _isScanning = signal(false);
   private readonly _lastResult = signal<ScanResult | null>(null);
 
   readonly isScanning = this._isScanning.asReadonly();
   readonly lastResult = this._lastResult.asReadonly();
-
-  private mockGuests: Map<string, Guest> = new Map([
-    ['TICKET-001', {
-      id: 'g1', name: 'Jean Dupont', photo: 'https://i.pravatar.cc/150?img=11',
-      category: 'famille_marie', table: 'TABLE 5', ticketId: 'TICKET-001', status: 'pending'
-    }],
-    ['TICKET-002', {
-      id: 'g2', name: 'Marie Laurent', photo: 'https://i.pravatar.cc/150?img=5',
-      category: 'vip', table: 'TABLE 1', ticketId: 'TICKET-002', status: 'validated',
-      scannedAt: new Date(Date.now() - 120000), scannedBy: 'Sécurité Entrée A', zone: 'Accès VIP / Loge'
-    }]
-  ]);
 
   startScanning(): void {
     this._isScanning.set(true);
@@ -29,57 +31,66 @@ export class ScannerService {
     this._isScanning.set(false);
   }
 
-  async scanTicket(ticketCode: string): Promise<ScanResult> {
-    await this.simulateDelay(800);
-    
-    const guest = this.mockGuests.get(ticketCode);
-    
-    if (!guest) {
+  async scanTicket(ticketId: string, eventId: string, gateId: string): Promise<ScanResult> {
+    try {
+      const scanRequest: ScanRequest = {
+        ticketId,
+        eventId,
+        gateId,
+        isSuccessful: true,
+        failureReason: ''
+      };
+
+      const response = await firstValueFrom(
+        this.http.post<any>(this.baseUrl, scanRequest)
+      );
+
+      // Construire le résultat de succès à partir de la réponse API
+      const result: ScanResult = {
+        success: true,
+        status: 'authorized',
+        message: 'Accès autorisé'
+      };
+
+      this._lastResult.set(result);
+      return result;
+
+    } catch (error: any) {
+      // Gérer les différents types d'erreur de l'API
+      const status = error?.status;
+      const apiMessage = error?.error?.message || error?.error?.failureReason;
+
+      let scanStatus: ScanResult['status'] = 'not_found';
+      let message = 'Erreur lors du scan';
+      let errorCode = '#E-500';
+
+      if (status === 404) {
+        scanStatus = 'not_found';
+        message = apiMessage || 'Billet non reconnu';
+        errorCode = '#E-404';
+      } else if (status === 409 || (apiMessage && apiMessage.toLowerCase().includes('déjà'))) {
+        scanStatus = 'already_scanned';
+        message = apiMessage || 'Billet déjà scanné';
+        errorCode = '#E-302';
+      } else if (status === 403) {
+        scanStatus = 'refused';
+        message = apiMessage || 'Accès refusé';
+        errorCode = '#E-403';
+      }
+
       const result: ScanResult = {
         success: false,
-        status: 'not_found',
-        message: 'Billet non reconnu',
-        errorCode: '#E-404'
+        status: scanStatus,
+        message,
+        errorCode
       };
+
       this._lastResult.set(result);
       return result;
     }
-
-    if (guest.status === 'validated') {
-      const result: ScanResult = {
-        success: false,
-        status: 'already_scanned',
-        guest,
-        message: 'Billet déjà scanné',
-        errorCode: '#E-302',
-        previousScan: {
-          time: guest.scannedAt!,
-          operator: guest.scannedBy!,
-          zone: guest.zone!
-        }
-      };
-      this._lastResult.set(result);
-      return result;
-    }
-
-    guest.status = 'validated';
-    guest.scannedAt = new Date();
-    
-    const result: ScanResult = {
-      success: true,
-      status: 'authorized',
-      guest,
-      message: 'Accès autorisé'
-    };
-    this._lastResult.set(result);
-    return result;
   }
 
   clearResult(): void {
     this._lastResult.set(null);
-  }
-
-  private simulateDelay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }

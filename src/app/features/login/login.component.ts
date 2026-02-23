@@ -31,45 +31,47 @@ import { AuthService } from '../../core';
         <!-- Login Form Card -->
         <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/60 border border-white">
           
-          <div class="space-y-6">
+          <form (ngSubmit)="login()" class="space-y-6">
             
-            <!-- QR Action -->
-             <button 
-              (click)="scanQR()"
-              class="w-full py-4 px-4 bg-indigo-50 text-indigo-700 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-indigo-100 active:scale-[0.98] transition-all border border-indigo-100"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 15h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008zm-2.25 0h.008v.008h-.008v-.008zm2.25 2.25h.008v.008h-.008v-.008zm-2.25 0h.008v.008h-.008v-.008zm2.25-4.5h.008v.008h-.008v-.008zm-2.25 0h.008v.008h-.008v-.008z"/>
-              </svg>
-              Scanner mon badge
-            </button>
-
-            <!-- Divider -->
-            <div class="relative flex items-center py-2">
-              <div class="flex-grow border-t border-slate-200"></div>
-              <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold uppercase tracking-widest">Ou par code</span>
-              <div class="flex-grow border-t border-slate-200"></div>
-            </div>
-
-            <!-- Manual Entry -->
+            <!-- Email -->
             <div class="space-y-2">
-              <label class="block text-sm font-semibold text-slate-700 ml-1">Code d'accès</label>
-              <div class="relative">
-                <input 
-                  type="text" 
-                  [(ngModel)]="accessCode"
-                  placeholder="------"
-                  maxlength="6"
-                  class="w-full pl-4 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-center tracking-[0.5em] font-mono text-xl font-bold shadow-inner"
-                />
-              </div>
+              <label class="block text-sm font-semibold text-slate-700 ml-1">Email</label>
+              <input 
+                type="email" 
+                [(ngModel)]="email"
+                name="email"
+                placeholder="exemple@email.com"
+                required
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all font-medium shadow-inner"
+              />
             </div>
+
+            <!-- Password -->
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700 ml-1">Mot de passe</label>
+              <input 
+                type="password" 
+                [(ngModel)]="password"
+                name="password"
+                placeholder="••••••••"
+                required
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all font-medium shadow-inner"
+              />
+            </div>
+
+            @if (errorMessage()) {
+              <div class="p-3 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 flex items-start gap-2">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                {{ errorMessage() }}
+              </div>
+            }
 
             <!-- Submit -->
             <button 
-              (click)="loginWithCode()"
-              [disabled]="accessCode().length !== 6 || isLoading()"
+              type="submit"
+              [disabled]="isLoading() || !email() || !password()"
               class="w-full py-4 px-6 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-slate-900/20 flex items-center justify-center gap-2"
             >
               @if (isLoading()) {
@@ -78,12 +80,12 @@ import { AuthService } from '../../core';
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               } @else {
-                Accéder maintenant
+                Se connecter
                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
               }
             </button>
 
-          </div>
+          </form>
         </div>
 
         <div class="mt-8 text-center text-xs text-slate-400 font-medium">
@@ -99,31 +101,32 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  accessCode = signal('');
+  email = signal('');
+  password = signal('');
   isLoading = signal(false);
+  errorMessage = signal('');
 
-  async loginWithCode(): Promise<void> {
+  async login(): Promise<void> {
+    if (!this.email() || !this.password()) return;
+
     this.isLoading.set(true);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    this.errorMessage.set('');
 
-    const success = await this.authService.loginWithCode(this.accessCode());
-    this.isLoading.set(false);
+    try {
+      const success = await this.authService.login({
+        email: this.email(),
+        password: this.password()
+      });
 
-    if (success) {
-      this.router.navigate(['/dashboard']);
-    }
-  }
-
-  async scanQR(): Promise<void> {
-    this.isLoading.set(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const success = await this.authService.loginWithQR('mock-qr-data');
-    this.isLoading.set(false);
-
-    if (success) {
-      this.router.navigate(['/dashboard']);
+      if (success) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.errorMessage.set('Email ou mot de passe incorrect');
+      }
+    } catch (e) {
+      this.errorMessage.set('Une erreur est survenue');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }
