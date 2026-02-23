@@ -18,6 +18,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'event/:id',
+    loadComponent: () => import('./features/event-detail/event-detail.component').then(m => m.EventDetailComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'scanner',
     loadComponent: () => import('./features/scanner/scanner.component').then(m => m.ScannerComponent),
     canActivate: [authGuard]
